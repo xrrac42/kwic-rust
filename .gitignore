@@ -1,0 +1,32 @@
+# Arquivos do compilador Rust
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# Arquivos de configuração do Rust
+/.cargo/
+/rust-toolchain
+
+# Arquivos do VS Code
+/.vs/
+
+
+# Arquivos de IDE genéricos
+*.swp
+*.swo
+*~
+.DS_Store
+
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+*.log
+*.tmp
+*.bk
+
+/output/
+/resultado.txt
+
+.env
+*.local

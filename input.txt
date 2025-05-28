@@ -1,0 +1,5 @@
+The quick brown fox
+A brown cat sat on the mat
+The cat is brown
+Hello world
+Rust programming is fun
