@@ -1,0 +1,6 @@
+Original: The quick brown fox
+KWIC:
+brown      The quick brown fox
+fox        The quick brown fox
+quick      The quick brown fox
+the        The quick brown fox

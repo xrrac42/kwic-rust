@@ -49,8 +49,15 @@ pub fn load_stop_words<P: AsRef<std::path::Path>>(
     }
 }
 
-pub fn split_into_words(s: &str) -> Vec<&str> {
-    s.unicode_words().collect()
+pub fn split_into_words(s: &str) -> Vec<String> {
+    use unicode_segmentation::UnicodeSegmentation;
+
+    s.graphemes(true)
+        .collect::<Vec<&str>>()
+        .split(|&g| g == " " || g == "\n" || g == "\t")
+        .filter(|chunk| !chunk.is_empty())
+        .map(|chunk| chunk.concat())
+        .collect()
 }
 
 pub fn process_kwic(
@@ -61,25 +68,44 @@ pub fn process_kwic(
     let mut results = Vec::new();
 
     for line in lines {
+        // Divide a linha em palavras
         let words = split_into_words(line);
-        
+
         for (i, word) in words.iter().enumerate() {
+            // Normaliza a palavra para comparação com stop words
             let normalized_word = if case_sensitive {
                 word.to_string()
             } else {
                 word.to_lowercase()
             };
-            
-            if !stop_words.contains(&normalized_word) {
-                let shifted: Vec<&str> = words[i..].iter().chain(&words[..i]).copied().collect();
-                let shifted_str = shifted.join(" ");
-                results.push((word.to_string(), shifted_str, line.clone()));
+
+            // Ignora palavras que estão nas stop words
+            if stop_words.contains(&normalized_word) {
+                continue;
             }
+
+            // Gera o contexto rotacionado
+            let mut context = Vec::new();
+            for (j, w) in words.iter().enumerate() {
+                if j == i {
+                    context.push(w.to_string());
+                } else {
+                    context.push(if case_sensitive {
+                        w.to_string()
+                    } else {
+                        w.to_lowercase()
+                    });
+                }
+            }
+
+            // Adiciona a palavra-chave e o contexto aos resultados
+            results.push((normalized_word, context.join(" ")));
         }
     }
 
-    results.sort_by(|a, b| a.1.to_lowercase().cmp(&b.1.to_lowercase()));
-    results.into_iter().map(|(kw, ctx, _)| (kw, ctx)).collect()
+    // Ordena os resultados alfabeticamente
+    results.sort_by(|a, b| a.0.cmp(&b.0));
+    results
 }
 
 pub fn read_lines<P: AsRef<std::path::Path>>(path: P) -> Result<Vec<String>, KwicError> {
